@@ -1,15 +1,21 @@
 import React from "react";
+import classNames from "classnames";
 
 export class Vignette extends React.Component {
+    
+    constructor(props){
+        super(props)
+    }
 
     render() {
+        let classNameDiv = classNames({
+            vignette: true
+        });
+
         return (
-            <div className="vignette">            
-                <img src={this.props.picture} onClick={this.props.searchAlbum}/>
-                <div className="vignette-detail" >
-                    <h5>{this.props.libelle}</h5>
-                </div>
-            
+            <div className={classNameDiv} onClick={this.props.search} >            
+                <img src={this.props.picture}  />
+                <p>{this.props.libelle}</p>
             </div>
         )
     }

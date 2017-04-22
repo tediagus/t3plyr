@@ -2,12 +2,14 @@ import React from "react";
 import { Search } from "./search";
 import { ArtistList } from "./artistlist";
 import { AlbumList } from "./albumlist";
-import { SingleList } from "./singlelist";
+import { Footer } from "./footer";
 import  url from "url" ;
 import superAgent from "superagent";
 import jsonp from "superagent-jsonp";
 
 export class PlayList extends React.Component {
+    
+    deezerApiTopken ;
 
     constructor(props){
         super(props);
@@ -15,8 +17,11 @@ export class PlayList extends React.Component {
             artisteName : "",
             artistList: [],
             albumList: [],
-            singleList:[]
+            errorMessage: ""
         };
+
+        this.deezerApiTopken
+
     }
 
     handleSearchTextChange(e){
@@ -27,7 +32,7 @@ export class PlayList extends React.Component {
      */
     onSubmit(){
         if(this.state.artisteName){
-            superAgent.get("https://api.deezer.com/search/artist?q="+this.state.artisteName+"&output=jsonp&output=jsonp&version=js-v1.0.0&DZ.request.callbacks.dzcb_00588c75a128d948e_335531810&limit=20")
+            superAgent.get("https://api.deezer.com/search/artist?q="+this.state.artisteName+"&output=jsonp&output=jsonp&version=js-v1.0.0") //&limit=100
             .use(jsonp)
             .end((err, res) =>{
                 if(res)
@@ -35,40 +40,44 @@ export class PlayList extends React.Component {
                     this.setState({
                         artistList: res.body.data,
                         albumList: [],
-                        singleList:[]
                     })
                 } else 
                 {
                         
                 }        
             });
-        }else {
-
-            console.log("le champs de recherche est vide")
+        } else {
+            this.setState({errorMessage: "Veuillez saisir un message dans le champ de recherche "});
+            //TODO affiche un message d'erreur
         }
     }
     
     searchAlbum(e, id){
-        superAgent.get("https://api.deezer.com/artist/"+id+"/albums&output=jsonp&output=jsonp&version=js-v1.0.0&DZ.request.callbacks.dzcb_00588c75a128d948e_335531810")
+        superAgent.get("https://api.deezer.com/artist/"+id+"/albums&output=jsonp&output=jsonp&version=js-v1.0.0")
         .use(jsonp)
         .end((err, res) =>{
             if(res)
             {
-                this.setState({albumList: res.body.data})
+                this.setState({albumList: res.body.data, tracks:[] })
             }            
         });
     }
-    
+
+
     render() {
-        console.log(this.state.artistList.length);
         return (
-            <div>
-                <div className="container">
-                    <Search onSubmit={this.onSubmit.bind(this)} value={this.state.artisteName} onChange={this.handleSearchTextChange.bind(this)} />
-                    {(this.state.artistList.length) ? <ArtistList listeArtiste={this.state.artistList} searchAlbum={this.searchAlbum.bind(this,this.props.id)} /> : null}    
-                    {(this.state.albumList.length) ? <AlbumList listeAlbum={this.state.albumList}  /> : null}    
-                    {(this.state.singleList.length) ? <SingleList singleList={this.state.singleList} /> : null}                    
+            <div >
+                <Search onSubmit={this.onSubmit.bind(this)} value={this.state.artisteName} onChange={this.handleSearchTextChange.bind(this)} />
+                <div className="flex-container">
+                    <div className="mod w14 pam"></div>
+                        <div className="flex-item-fluid pam">
+                            {(this.state.errorMessage) ? <div className="warning" > {this.state.errorMessage} </div> : ""}
+                            {(this.state.artistList.length) ? <ArtistList listeArtiste={this.state.artistList} searchAlbum={this.searchAlbum.bind(this,this.props.id)} /> : null}    
+                            {(this.state.albumList.length) ? <AlbumList listeAlbum={this.state.albumList} /> : null} 
+                        </div>
+                    <div className="mod w14 pam"></div>
                 </div>
+                 <Footer />                  
             </div>
         )
     }
