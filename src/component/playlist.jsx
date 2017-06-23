@@ -3,15 +3,12 @@ import { Search } from "./search";
 import { ArtistList } from "./artistlist";
 import { AlbumList } from "./albumlist";
 import { Footer } from "./footer";
-import  url from "url" ;
 import superAgent from "superagent";
-import jsonp from "superagent-jsonp";
+let jsonp = require('superagent-jsonp');
 
 export class PlayList extends React.Component {
     
-    deezerApiTopken ;
-
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {
             artisteName : "",
@@ -19,31 +16,30 @@ export class PlayList extends React.Component {
             albumList: [],
             errorMessage: ""
         };
-
-        this.deezerApiTopken
-
     }
 
     handleSearchTextChange(e){
         this.setState({artisteName: e.target.value});
     }
+
     /**
      * action de soumission du formulaire
      */
     onSubmit(){
         if(this.state.artisteName){
-            superAgent.get("https://api.deezer.com/search/artist?q="+this.state.artisteName+"&output=jsonp&output=jsonp&version=js-v1.0.0") //&limit=100
+            //+"&output=jsonp&output=jsonp&version=js-v1.0.0"
+            superAgent.get("http://api.deezer.com/search/artist?q="+this.state.artisteName+"&output=jsonp") //&limit=100
+            //.accept('application/json')
             .use(jsonp)
-            .end((err, res) =>{
+            .end( (err, res) => {
                 if(res)
                 {
-                    this.setState({
-                        artistList: res.body.data,
-                        albumList: [],
+                    this.setState(() => {
+                       return { artistList: res.body.data , albumList:[] }
                     })
                 } else 
                 {
-                        
+                  //  this.setState({errorMessage: err});            
                 }        
             });
         } else {
@@ -52,8 +48,16 @@ export class PlayList extends React.Component {
         }
     }
     
-    searchAlbum(e, id){
-        superAgent.get("https://api.deezer.com/artist/"+id+"/albums&output=jsonp&output=jsonp&version=js-v1.0.0")
+
+
+    /**
+     * Recherche les albums d'un artiste
+     * @param {*} e 
+     * @param {*} id 
+     */
+    searchAlbum(e, id) {
+        superAgent.get("http://api.deezer.com/artist/"+id+"/albums&output=jsonp")
+        .set('Accept', 'application/json')
         .use(jsonp)
         .end((err, res) =>{
             if(res)
@@ -63,7 +67,6 @@ export class PlayList extends React.Component {
         });
     }
 
-
     render() {
         return (
             <div >
@@ -72,12 +75,12 @@ export class PlayList extends React.Component {
                     <div className="mod w14 pam"></div>
                         <div className="flex-item-fluid pam">
                             {(this.state.errorMessage) ? <div className="warning" > {this.state.errorMessage} </div> : ""}
-                            {(this.state.artistList.length) ? <ArtistList listeArtiste={this.state.artistList} searchAlbum={this.searchAlbum.bind(this,this.props.id)} /> : null}    
+                            {(this.state.artistList.length) ? <ArtistList listeArtiste={this.state.artistList} searchAlbum={this.searchAlbum.bind(this,this.state.id)} /> : null}    
                             {(this.state.albumList.length) ? <AlbumList listeAlbum={this.state.albumList} /> : null} 
                         </div>
                     <div className="mod w14 pam"></div>
                 </div>
-                 <Footer />                  
+                {/* <Footer /> */}                 
             </div>
         )
     }

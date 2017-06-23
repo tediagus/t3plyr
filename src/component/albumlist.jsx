@@ -3,87 +3,91 @@ import  {Vignette} from "./vignette";
 import { Song } from "./song";
 import _ from "lodash";
 import classNames from "classnames";
+import superAgent from "superagent";
+let jsonp = require('superagent-jsonp');
+
+
 
 export class AlbumList extends React.Component {
 
-
     constructor(props){
-        super(props);
-
-        this.initialize();
+        super(props); 
+        this.state = {
+            "tracks": []
+        }
     }
 
-    initialize(){
-        let albums = _.cloneDeep(this.props.listeAlbum);
-        albums.map((data, i)=>{
-            _.merge(data, { isVisible: false });
+
+    handleClick (obj){
+        this.getTracks(obj);
+        obj.isVisible = (obj.isVisible) ? !obj.isVisible : true;
+    }  
+    
+
+    getTracks(data){
+        superAgent.get(data.tracklist+"&output=jsonp")
+        .set('Accept', 'application/json')
+        .use(jsonp({timeout: 6000}))
+        .end((err, res) => {
+           if(res && res.body.data)
+            {   
+                this.setState({tracks: res.body.data});
+            } else {
+                console.log("Erreur dans la requete des chansons" , err);
+            }        
         });
-
-         this.state = {
-            listeAlbum : albums
-        } 
     }
 
-    handleClick (id){
-        let albums = _.cloneDeep(this.state.listeAlbum);
-        albums.map((data, i)=>{
-            if( data.id == id){
-                data.isVisible =!data.isVisible;
-            }
+    getAlbum(songs){
+
+        songs.map((song, i) => {
+
+            superAgent("http://localhost:8081/api/download/"+song.id)
+                .end((err, res) =>{
+                    console.log(res);
+                });
         });
-        this.setState({listeAlbum: albums});
     }
 
 
-     renderList (type){  
-        return  this.state.listeAlbum.map((data, i)=>{
+    renderList (type) {  
+        return  this.props.listeAlbum.map((data, i)=>{
 
             let classNameSong = classNames({
                 "song-container": true,
-                "hidden ": !data.isVisible 
+                "hidden" : !data.isVisible
             });
 
             let classNameAlbumItem = classNames({
-              "album-item" : true,
-              active: data.isVisible
+                "album-item" : true
             });
-
-            if(data.record_type == type) {
-                return (
-                    <div className="album-container">
-                        <div key={data.id} className={classNameAlbumItem} onClick={ () => { this.handleClick(data.id) }}>
-                            <Vignette 
-                                id={data.id}
-                                picture={data.cover} 
-                                libelle={data.title}
-                                active ={data.isVisible }
-                            /> 
-                        </div>
-                        <div className={classNameSong} >
-                            <Song albumId={data.id} isVisible={data.isVisible}/>
-                        </div>
-                    </div >
-                );
-            }
+            
+            return (
+                <div key={data.id}>
+                    <div className={classNameAlbumItem} onClick={ ()=> { this.handleClick(data)} }>
+                        <Vignette 
+                            id={data.id}
+                            picture={data.cover_small} 
+                            libelle={data.title}
+                            active={data.isVisible}
+                        /> 
+                        
+                        { (this.state.tracks) ? <div className={classNameSong} ><Song tracks={this.state.tracks}  dzDl={ () => {this.getAlbum(this.state.tracks)} }/></div> : <div /> }
+                    </div>
+                    
+                </div >
+            );
         });
-        
     }
 
     render() {
+        console.log("rendu des albums")
         return (
-            <div>                
-                <h2>Liste des Albums</h2>
+            <div className="album-container">                
+                <h2>Albums ({this.props.listeAlbum.length}) </h2>
                 {this.renderList("album")}
-            
-                 {/*<div className=" spacer single-list">
-                    <h2>Liste des Singles</h2>
-                    {this.renderList("single")}
-                </div>*/}
             </div>
         )
-    }
-
-   
-    
+    }    
 }
 

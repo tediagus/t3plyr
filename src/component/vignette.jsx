@@ -15,7 +15,7 @@ export class Vignette extends React.Component {
         return (
             <div className={classNameDiv} onClick={this.props.search} >            
                 <img src={this.props.picture}  />
-                <p>{this.props.libelle}</p>
+                {this.props.libelle}
             </div>
         )
     }

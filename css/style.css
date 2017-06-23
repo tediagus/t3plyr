@@ -1,7 +1,11 @@
 header  {
-    background: #6A1B9A;
-    height: 150px;
-    padding: 3%;
+    background: rgba(40, 134, 203, 0.3);
+}
+
+.logo {
+
+    background: rgba(40, 134, 203, 0.5);
+    height: 50px;
 }
 
 form {
@@ -37,12 +41,12 @@ form button {
     cursor: pointer;
 }
 
-.hidden{
+.hidden {
     display: none;
 }
 
-.active {
-    z-index:10;
+.active{
+    z-index: 10;
 }
 
 .active::before {
