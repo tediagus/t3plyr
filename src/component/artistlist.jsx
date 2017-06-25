@@ -15,7 +15,7 @@ export class ArtistList extends React.Component {
         let html = this.props.listeArtiste.map((data, k )=>{
             return (
                 <Vignette 
-                    search={this.props.searchAlbum.bind(this, data.id)} 
+                    search={this.props.searchAlbum.bind(this,data.id, data.name)} 
                     key={data.id} 
                     id={data.id}
                     picture ={data.picture_small} 

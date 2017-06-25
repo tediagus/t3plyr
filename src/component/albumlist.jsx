@@ -6,8 +6,6 @@ import classNames from "classnames";
 import superAgent from "superagent";
 let jsonp = require('superagent-jsonp');
 
-
-
 export class AlbumList extends React.Component {
 
     constructor(props){
@@ -25,6 +23,7 @@ export class AlbumList extends React.Component {
     
 
     getTracks(data){
+
         superAgent.get(data.tracklist+"&output=jsonp")
         .set('Accept', 'application/json')
         .use(jsonp({timeout: 6000}))
@@ -38,21 +37,18 @@ export class AlbumList extends React.Component {
         });
     }
 
-    getAlbum(songs){
-
+    getAlbum(songs){        
         songs.map((song, i) => {
-
-            superAgent("http://localhost:8081/api/download/"+song.id)
-                .end((err, res) =>{
-                    console.log(res);
-                });
+            superAgent("http://localhost:8081/api/download/"+song.id+"/"+this.props.artName)
+            .end((err, res) =>{
+                console.log(res);
+            });
         });
     }
 
 
     renderList (type) {  
         return  this.props.listeAlbum.map((data, i)=>{
-
             let classNameSong = classNames({
                 "song-container": true,
                 "hidden" : !data.isVisible

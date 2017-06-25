@@ -16,6 +16,7 @@ export class PlayList extends React.Component {
             albumList: [],
             errorMessage: ""
         };
+        
     }
 
     handleSearchTextChange(e){
@@ -55,14 +56,21 @@ export class PlayList extends React.Component {
      * @param {*} e 
      * @param {*} id 
      */
-    searchAlbum(e, id) {
+    searchAlbum(id, artName) {
+
+    
         superAgent.get("http://api.deezer.com/artist/"+id+"/albums&output=jsonp")
         .set('Accept', 'application/json')
         .use(jsonp)
         .end((err, res) =>{
             if(res)
             {
-                this.setState({albumList: res.body.data, tracks:[] })
+                this.setState(() => {
+                    return { 
+                        albumList: res.body.data,
+                        artisteName: artName 
+                    }
+                })
             }            
         });
     }
@@ -75,8 +83,8 @@ export class PlayList extends React.Component {
                     <div className="mod w14 pam"></div>
                         <div className="flex-item-fluid pam">
                             {(this.state.errorMessage) ? <div className="warning" > {this.state.errorMessage} </div> : ""}
-                            {(this.state.artistList.length) ? <ArtistList listeArtiste={this.state.artistList} searchAlbum={this.searchAlbum.bind(this,this.state.id)} /> : null}    
-                            {(this.state.albumList.length) ? <AlbumList listeAlbum={this.state.albumList} /> : null} 
+                            {(this.state.artistList.length) ? <ArtistList listeArtiste={this.state.artistList} searchAlbum={this.searchAlbum.bind(this)} /> : null}    
+                            {(this.state.albumList.length) ? <AlbumList listeAlbum={this.state.albumList} artName={this.state.artisteName}/> : null} 
                         </div>
                     <div className="mod w14 pam"></div>
                 </div>
